@@ -1,0 +1,52 @@
+apiVersion: k3d.io/v1alpha5
+kind: Simple
+metadata:
+  name: arkhn
+image: rancher/k3s:v1.28.1-rc2-k3s1
+servers: 3
+kubeAPI: # same as `--api-port myhost.my.domain:6445` (where the name would resolve to 127.0.0.1)
+  host: host.docker.internal # important for the `server` setting in the kubeconfig
+  hostIP: "127.0.0.1" # where the Kubernetes API will be listening on
+  hostPort: "6445" # where the Kubernetes API listening port will be mapped to on your host system
+subnet: "172.28.0.0/24"
+ports:
+- port: 80:80 # same as `--port '8080:80@loadbalancer'`
+  nodeFilters:
+    - loadbalancer
+- port: 443:443 # same as `--port '8443:443@loadbalancer'`
+  nodeFilters:
+    - loadbalancer
+options:
+  k3d: # k3d runtime settings
+    wait: true # wait for cluster to be usable before returining; same as `--wait` (default: true)
+    timeout: "60s" # wait timeout before aborting; same as `--timeout 300s` which is 5mins
+    # disableLoadbalancer: true # same as `--no-lb`
+  k3s:
+    extraArgs:
+      - arg: --cluster-cidr=10.42.0.0/16
+        nodeFilters:
+          - server:*
+      - arg: --service-cidr=10.24.0.0/16
+        nodeFilters:
+          - server:*
+      - arg: --tls-san=host.docker.internal
+        nodeFilters:
+          - server:*
+      - arg: --disable-helm-controller
+        nodeFilters:
+          - server:*
+      - arg: --disable=traefik,metrics-server
+        nodeFilters:
+          - server:*
+      - arg: --write-kubeconfig-mode="0644"
+        nodeFilters:
+          - server:*
+      - arg: --secrets-encryption=true
+        nodeFilters:
+          - server:*
+      - arg: --snapshotter=stargz
+        nodeFilters:
+          - server:*
+  kubeconfig:
+    updateDefaultKubeconfig: true # add new cluster to your default Kubeconfig; same as `--kubeconfig-update-default` (default: true)
+    switchCurrentContext: true # also set current-context to the new cluster's context; same as `--kubeconfig-switch-context` (default: true)

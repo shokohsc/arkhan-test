@@ -1,0 +1,46 @@
+# ---
+# apiVersion: kv.vault.upbound.io/v1alpha1
+# kind: SecretV2
+# metadata:
+#   name: traefik
+# spec:
+#   providerRef:
+#     name: upbound-provider-vault
+#   providerConfigRef:
+#     name: vault-provider-config
+#   forProvider:
+#     dataJsonSecretRef:
+#       key: tls.ca
+#       name: arkhn-ca
+#       namespace: traefik
+#     mount: kv
+#     name: traefik/certs/arkhn-ca
+---
+apiVersion: kubernetes.vault.upbound.io/v1alpha1
+kind: AuthBackendConfig
+metadata:
+  name: k3d
+spec:
+  providerRef:
+    name: upbound-provider-vault
+  providerConfigRef:
+    name: vault-provider-config
+  forProvider:
+    backend: kubernetes
+    kubernetesHost: http:/kubernetes.default.svc.cluster.local:443
+---
+apiVersion: vault.vault.upbound.io/v1alpha1
+kind: Policy
+metadata:
+  name: k3d
+spec:
+  providerRef:
+    name: upbound-provider-vault
+  providerConfigRef:
+    name: vault-provider-config
+  forProvider:
+    name: k3d-read-certificates
+    policy: |
+      path "pki*" {
+        capabilities = ["read", "list"]
+      }

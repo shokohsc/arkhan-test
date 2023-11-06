@@ -1,0 +1,177 @@
+---
+apiVersion: pki.vault.upbound.io/v1alpha1
+kind: SecretBackendRootCert
+metadata:
+  name: arkhn
+spec:
+  providerRef:
+    name: upbound-provider-vault
+  providerConfigRef:
+    name: vault-provider-config
+  forProvider:
+    backend: pki
+    commonName: Arkhn CA
+    format: pem
+    keyBits: 4096
+    keyType: rsa
+    permittedDnsDomains:
+    - arkhn.tld
+    ttl: "315360000"
+    type: internal
+---
+apiVersion: pki.vault.upbound.io/v1alpha1
+kind: SecretBackendRole
+metadata:
+  name: arkhn
+spec:
+  providerRef:
+    name: upbound-provider-vault
+  providerConfigRef:
+    name: vault-provider-config
+  forProvider:
+    allowAnyName: true
+    # allowLocalhost: true
+    # allowIpSans: true
+    # allowSubdomains: false
+    # allowedDomains:
+    # - arkhn.tld
+    backend: pki
+    keyBits: 4096
+    keyType: rsa
+    name: arkhn
+    ttl: "3600"
+---
+apiVersion: pki.vault.upbound.io/v1alpha1
+kind: SecretBackendCrlConfig
+metadata:
+  name: arkhn
+spec:
+  providerRef:
+    name: upbound-provider-vault
+  providerConfigRef:
+    name: vault-provider-config
+  forProvider:
+    backend: pki
+    disable: false
+    expiry: 72h
+---
+apiVersion: pki.vault.upbound.io/v1alpha1
+kind: SecretBackendConfigUrls
+metadata:
+  name: arkhn
+spec:
+  providerRef:
+    name: upbound-provider-vault
+  providerConfigRef:
+    name: vault-provider-config
+  forProvider:
+    backend: pki
+    issuingCertificates:
+    - http://vault.vault.svc.cluster.local:8200/v1/pki/ca
+    crlDistributionPoints:
+    - http://vault.vault.svc.cluster.local:8200/v1/pki/crl
+---
+apiVersion: pki.vault.upbound.io/v1alpha1
+kind: SecretBackendIntermediateCertRequest
+metadata:
+  name: arkhn
+spec:
+  providerRef:
+    name: upbound-provider-vault
+  providerConfigRef:
+    name: vault-provider-config
+  forProvider:
+    backend: pki_int
+    commonName: Arkhn Intermediate CA
+    keyBits: 4096
+    type: internal
+# ---
+# apiVersion: pki.vault.upbound.io/v1alpha1
+# kind: SecretBackendSign
+# metadata:
+#   name: arkhn
+# spec:
+#   providerRef:
+#     name: upbound-provider-vault
+#   providerConfigRef:
+#     name: vault-provider-config
+#   forProvider:
+#     name: arkhn
+#     backend: pki
+#     commonName: whoami.localhost
+#     csr: |-
+      
+# ---
+# apiVersion: pki.vault.upbound.io/v1alpha1
+# kind: SecretBackendIntermediateSetSigned
+# metadata:
+#   name: arkhn
+# spec:
+#   providerRef:
+#     name: upbound-provider-vault
+#   providerConfigRef:
+#     name: vault-provider-config
+#   forProvider:
+#     backend: pki
+#     certificate: |
+#       -----BEGIN CERTIFICATE-----
+#       MIIFZzCCA0+gAwIBAgIUN57grfdjnCwcTcoujoagrEXpyVYwDQYJKoZIhvcNAQEL
+#       BQAwOzEOMAwGA1UEChMFQXJraG4xFzAVBgNVBAsTDkluZnJhc3RydWN0dXJlMRAw
+#       DgYDVQQDEwdSb290IENBMB4XDTIzMTAzMDE3MjAzOVoXDTMzMTAyNzE3MjEwN1ow
+#       OzEOMAwGA1UEChMFQXJraG4xFzAVBgNVBAsTDkluZnJhc3RydWN0dXJlMRAwDgYD
+#       VQQDEwdSb290IENBMIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEA3Hkx
+#       G/SNhN8jSsVGqof/VMRMZa199smuA9Zkbbu/FYNTmwBBOjCJBLrGmIXu/suYPSAT
+#       YtRO5254TC6LxPeEvXMlZv42jWQNib1D58c6yQ7XVFYIHrwW0vTvzk9/4bXIhZdf
+#       Q80BTN7nQ3Kr7s++U/eIP62C+svjKxw2p6u/4ewm09GlSOXQLjOu+ArlFkhRJunR
+#       9tAKw+Ftp+T9d5nTEiPKG6joF7/G1l79ssl8Zja2egLV6jIrI8PZ67HEBxLIrVL/
+#       4BVyRHEtu5usAuDQHld2iKxVXnuQbWhVboAtgraxYw5/z2wqyuZiUI9t/S8kd8Ru
+#       cAYobUzq/gU3DYllmU2zX20B7SV5vjF5IAAaG6wH7MYoh6lE2rkUrB+xkGxTKild
+#       ZJuWzZFeonk7BciKBWizucfu803NVfAQw7Gz1theGzMaJszqoNU72gnGvjEk7K8F
+#       qvfjP8sacddB2js7N/1qrL/bFUF5pee3QxS5RJXCS826+EiAxEzHxUh7uVhsRXOt
+#       DMeWYYRjLMbLvSsbc64xOde67Br2haG2fYZ0N2OZfXeaPzYPcf+EA4U/2FN8RZAO
+#       fkRFL2mMQiUTBnhW2fyRVwrViScgHFs5ZS1UMxwWspACJgVogHild7BWeMDQ/M2F
+#       G9tqvunBJQ4bbIC8y0uGGl3703+OZhmvz1J0DecCAwEAAaNjMGEwDgYDVR0PAQH/
+#       BAQDAgEGMA8GA1UdEwEB/wQFMAMBAf8wHQYDVR0OBBYEFKVN7Z2U4fZFVSpitBla
+#       x/nzozA7MB8GA1UdIwQYMBaAFKVN7Z2U4fZFVSpitBlax/nzozA7MA0GCSqGSIb3
+#       DQEBCwUAA4ICAQDSOah5zXpXfh5tkAeLB8GcBC+0hIP3Fx4UvGTy6zV9blJQ5nDt
+#       A/9pUp4p+5M4hJtqxAdLKe88ya1ZUntuq4E2ySQgcKJLHdlSNQG/qNyl6cp2TN4k
+#       RBlpbHfUAwJKatgLjAybc+luqNzuTtEZVPgMdHDbmHHrV726lKhRswE6gh0VK4vy
+#       cy/hXjj/PIfHSMjDI532Nz16CumMuObXfb79yiQexOEYf/xvdTCEA3dMPWzFQBMI
+#       YA5qTBMzLkSGKS2CFN5LTbJgsrGmtVtcDZ+uZsJXlnkoF152q0nTXGT+3wnRqFCc
+#       IxEJa0t9DI2O2ce8KV465uEtEZkdl55MAIpyUpaxcqKyWrLuKRPiJwwOuznSp/mw
+#       WLjFEj+rFKpAkA5tVKaYgbcq7p8Sq40PKvWpDnouaqAGz38KtBt8IgjK0JhL+OCN
+#       mImMZ9IrIIDzwsiHGcm1l7XS2LZmZc1OutjGBTspI338l96Lc6/oo3rD+Mlkdn0D
+#       m3zrLGbBfZFpfbx5LyLWQGdISwCG9+/yrB8GmwizESZzvg5cM7SewXCcoQl0esKI
+#       2JHEjRYhi20F/iJYV+syIPZ7upezaPhNLU4Aat/oOHdFn5ASfOKXdXb48PMjL7tl
+#       RQbAud8edqxav9LtRdCxYjBkhfyQOMP34yCZi4boYdoh6talktZCGD2WSQ==
+#       -----END CERTIFICATE-----
+# ---
+# apiVersion: pki.vault.upbound.io/v1alpha1
+# kind: SecretBackendCert
+# metadata:
+#   name: whoami
+# spec:
+#   providerRef:
+#     name: upbound-provider-vault
+#   providerConfigRef:
+#     name: vault-provider-config
+#   forProvider:
+#     backend: pki
+#     commonName: whoami.localhost
+#     name: arkhn
+# ---
+# apiVersion: pki.vault.upbound.io/v1alpha1
+# kind: SecretBackendConfigCA
+# metadata:
+#   name: arkhn
+# spec:
+#   providerRef:
+#     name: upbound-provider-vault
+#   providerConfigRef:
+#     name: vault-provider-config
+#   forProvider:
+#     backend: pki
+#     pemBundleSecretRef:
+#       key: example-key
+#       name: example-secret
+#       namespace: upbound-system

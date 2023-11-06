@@ -1,0 +1,13 @@
+ingressRoute:
+  dashboard:
+    entryPoints: ["traefik", "web"]
+providers:
+  kubernetesCRD:
+    allowCrossNamespace: true
+ports:
+  websecure:
+    tls:
+      # this is the name of a TLSOption definition
+      options: default
+      middlewares:
+      - traefik-passtlsclientcert@kubernetescrd

@@ -1,0 +1,95 @@
+---
+apiVersion: traefik.io/v1alpha1
+kind: TLSOption
+metadata:
+  name: default
+  namespace: traefik
+spec:
+  clientAuth:
+    # the CA certificate is extracted from key `tls.ca` or `ca.crt` of the given secrets.
+    secretNames:
+      - arkhn-ca
+    clientAuthType: RequireAndVerifyClientCert
+---
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: passtlsclientcert
+  namespace: traefik
+spec:
+  passTLSClientCert:
+    pem: true
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: traefik
+  namespace: traefik
+spec:
+  entryPoints:
+    - web
+    # - websecure
+  routes:
+  - kind: Rule
+    match: HostRegexp(`traefik.{domain:[a-z0-9]+}`)
+    # middlewares:
+    # - name: passtlsclientcert
+    #   namespace: traefik
+    services:
+    - kind: Service
+      name: traefik
+      namespace: traefik
+      port: 80
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: vault
+  namespace: vault
+spec:
+  entryPoints:
+    - web
+    # - websecure
+  routes:
+  - kind: Rule
+    match: HostRegexp(`vault.{domain:[a-z0-9]+}`)
+    # middlewares:
+    # - name: passtlsclientcert
+    #   namespace: traefik
+    services:
+    - kind: Service
+      name: vault-ui
+      namespace: vault
+      port: 8200
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: whoami
+  namespace: default
+spec:
+  entryPoints:
+    - web
+    # - websecure
+  routes:
+  - kind: Rule
+    match: HostRegexp(`whoami.{domain:[a-z0-9]+}`)
+    middlewares:
+    - name: passtlsclientcert
+      namespace: traefik
+    services:
+    - kind: Service
+      name: whoami
+      namespace: default
+      port: 80
+  # tls:
+  #   secretName: supersecret
+  #   options:
+  #     name: opt
+  #     namespace: default
+  #   certResolver: foo
+  #   domains:
+  #   - main: example.net
+  #     sans:
+  #     - a.example.net
+  #     - b.example.net
